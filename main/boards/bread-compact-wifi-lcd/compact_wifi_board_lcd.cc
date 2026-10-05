@@ -63,6 +63,7 @@ class CompactWifiBoardLCD : public WifiBoard {
 private:
  
     Button boot_button_;
+    Button touch_button_;   // Robottina: segura para falar, solta para ela responder
     LcdDisplay* display_;
 
     void InitializeSpi() {
@@ -131,6 +132,14 @@ private:
             }
             app.ToggleChatState();
         });
+        // Robottina: aperta e segura = ouvindo (se ela estiver falando, para e escuta)
+        //            solta = acabou a fala, ela responde
+        touch_button_.OnPressDown([this]() {
+            Application::GetInstance().StartListening();
+        });
+        touch_button_.OnPressUp([this]() {
+            Application::GetInstance().StopListening();
+        });
     }
 
     // 物联网初始化，添加对 AI 可见设备
@@ -140,7 +149,8 @@ private:
 
 public:
     CompactWifiBoardLCD() :
-        boot_button_(BOOT_BUTTON_GPIO) {
+        boot_button_(BOOT_BUTTON_GPIO),
+        touch_button_(TOUCH_BUTTON_GPIO) {
         InitializeSpi();
         InitializeLcdDisplay();
         InitializeButtons();
